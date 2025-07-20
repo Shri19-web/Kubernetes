@@ -32,7 +32,7 @@ spec:
         runAsUser: 1001
         fsGroup: 1001
       containers:
-      - name: my-application
+      - name: my-application-server
         image: 131924/kubernetes.com/my-application:latest
         imagePullPolicy: Always
         ports:
