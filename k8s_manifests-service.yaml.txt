@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-application-service
+  namespace: production
+  labels:
+    app: my-application
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 8080
+    protocol: TCP
+    name: https
+  selector:
+    app: my-application
