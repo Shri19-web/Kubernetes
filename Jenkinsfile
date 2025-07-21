@@ -1,22 +1,30 @@
 pipeline {
     agent any
-    
+
     environment {
         DOCKER_IMAGE = 'my-application'
         DOCKER_TAG = "${BUILD_NUMBER}"
         DOCKER_REGISTRY = '131924/kubernetes.com'
         K8S_NAMESPACE = 'my-application-ns'
-        KUBECONFIG = credentials('kubeconfig')
+        KUBECONFIG = credentials('kubeconfig') // Must be stored in Jenkins Credentials
     }
-    
+
     stages {
-        stage('Checkout source') {
-    steps {
-        git url: 'git branch: 'main', url: 'https://github.com/Shri19-web/Kubernetes.git'',
-            credentialsId: 'github-creds',
-            branch: "${env.BRANCH_NAME ?: 'main'}"
-    }
-}
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: 'main']],
+                    userRemoteConfigs: [[url: 'https://github.com/Shri19-web/Kubernetes.git']]
+                ])
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo "Repo cloned successfully!"
+            }
+        }
 
         stage('Install Dependencies') {
             steps {
@@ -25,7 +33,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Run Tests') {
             steps {
                 script {
@@ -34,23 +42,23 @@ pipeline {
             }
             post {
                 always {
-                    junit 'test-results.xml' testResultsPattern: 'test-results.xml'
+                    junit testResults: 'test-results.xml'
                 }
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
                 script {
                     def image = docker.build("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}")
-                    docker.withRegistry("https://${131924/kubernetes.com}", 'docker-registry-creds') {
+                    docker.withRegistry("https://${DOCKER_REGISTRY}", 'docker-registry-creds') {
                         image.push()
                         image.push('latest')
                     }
                 }
             }
         }
-        
+
         stage('Security Scan') {
             steps {
                 script {
@@ -58,7 +66,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy to Staging') {
             when {
                 branch 'develop'
@@ -73,7 +81,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy to Production') {
             when {
                 branch 'main'
@@ -90,7 +98,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             cleanWs()
@@ -103,8 +111,11 @@ pipeline {
             emailext (
                 subject: "Build Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
                 body: "Build failed. Check console output at ${env.BUILD_URL}",
-                to: "${env.CHANGE_vidyacb19@gmail.com}"
+                to: "vidyacb19@gmail.com"
             )
         }
     }
-}
+}           
+               
+           
+            
