@@ -25,6 +25,15 @@ pipeline {
                 echo "Repo cloned successfully!"
             }
         }
+        
+stage('Install Node.js') {
+  steps {
+    sh '''
+      curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+      apt-get install -y nodejs
+    '''
+  }
+}
 
         stage('Install Dependencies') {
             steps {
@@ -106,16 +115,11 @@ pipeline {
         success {
             echo 'Pipeline completed successfully!'
         }
-        failure {
-            echo 'Pipeline failed!'
-            emailext (
-                subject: "Build Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: "Build failed. Check console output at ${env.BUILD_URL}",
-                to: "vidyacb19@gmail.com"
-            )
-        }
+      }        
     }
-}           
+}
+
+           
                
            
             
