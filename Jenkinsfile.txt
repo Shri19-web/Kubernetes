@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Checkout source') {
     steps {
-        git url: 'https://github.com/Shri19-web/Kubernetes.git',
+        git url: 'git branch: 'main', url: 'https://github.com/Shri19-web/Kubernetes.git'',
             credentialsId: 'github-creds',
             branch: "${env.BRANCH_NAME ?: 'main'}"
     }
