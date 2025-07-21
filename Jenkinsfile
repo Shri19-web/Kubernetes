@@ -116,10 +116,4 @@ stage('Install Node.js') {
             echo 'Pipeline completed successfully!'
         }
       }        
-    }
-}
-
-           
-               
-           
-            
+ }
