@@ -40,7 +40,13 @@ pipeline {
 
         stage('Install Dependencies') {
     steps {
-        sh 'npm install'
+        echo 'Installing Node.js dependencies...'
+        sh '''
+            npm install || {
+                echo "npm install failed!"
+                exit 1
+            }
+        '''
     }
 }
 
