@@ -6,7 +6,7 @@ pipeline {
         DOCKER_TAG = "${BUILD_NUMBER}"
         DOCKER_REGISTRY = '131924/kubernetes.com'
         K8S_NAMESPACE = 'my-application-ns'
-        KUBECONFIG = credentials('kubeconfig') // Must be stored in Jenkins Credentials
+        KUBECONFIG = credentials('kubeconfig')
     }
 
     stages {
@@ -25,33 +25,32 @@ pipeline {
                 echo "Repo cloned successfully!"
             }
         }
-        
-stage('Install Node.js') {
-  steps {
-    sh '''
-      curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-      apt-get install -y nodejs
-    '''
-  }
-}
+
+        stage('Install Node.js') {
+            steps {
+                sh '''
+                    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+                    apt-get update
+                    apt-get install -y nodejs
+                    node -v
+                    npm -v
+                '''
+            }
+        }
 
         stage('Install Dependencies') {
             steps {
-                script {
-                    sh 'npm ci'
-                }
+                sh 'npm ci'
             }
         }
 
         stage('Run Tests') {
             steps {
-                script {
-                    sh 'npm test'
-                }
+                sh 'npm test'
             }
             post {
                 always {
-                    junit testResults: 'test-results.xml'
+                    junit 'test-results.xml'
                 }
             }
         }
@@ -70,9 +69,7 @@ stage('Install Node.js') {
 
         stage('Security Scan') {
             steps {
-                script {
-                    sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}"
-                }
+                sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}"
             }
         }
 
@@ -81,13 +78,11 @@ stage('Install Node.js') {
                 branch 'develop'
             }
             steps {
-                script {
-                    sh """
-                        sed -i 's|IMAGE_TAG|${DOCKER_TAG}|g' k8s-manifests/deployment.yaml
-                        kubectl apply -f k8s-manifests/ -n staging
-                        kubectl rollout status deployment/${DOCKER_IMAGE} -n staging
-                    """
-                }
+                sh """
+                    sed -i 's|IMAGE_TAG|${DOCKER_TAG}|g' k8s-manifests/deployment.yaml
+                    kubectl apply -f k8s-manifests/ -n staging
+                    kubectl rollout status deployment/${DOCKER_IMAGE} -n staging
+                """
             }
         }
 
@@ -96,14 +91,12 @@ stage('Install Node.js') {
                 branch 'main'
             }
             steps {
-                script {
-                    input message: 'Deploy to production?', ok: 'Deploy'
-                    sh """
-                        sed -i 's|IMAGE_TAG|${DOCKER_TAG}|g' k8s-manifests/deployment.yaml
-                        kubectl apply -f k8s-manifests/ -n ${K8S_NAMESPACE}
-                        kubectl rollout status deployment/${DOCKER_IMAGE} -n ${K8S_NAMESPACE}
-                    """
-                }
+                input message: 'Deploy to production?', ok: 'Deploy'
+                sh """
+                    sed -i 's|IMAGE_TAG|${DOCKER_TAG}|g' k8s-manifests/deployment.yaml
+                    kubectl apply -f k8s-manifests/ -n ${K8S_NAMESPACE}
+                    kubectl rollout status deployment/${DOCKER_IMAGE} -n ${K8S_NAMESPACE}
+                """
             }
         }
     }
@@ -115,5 +108,8 @@ stage('Install Node.js') {
         success {
             echo 'Pipeline completed successfully!'
         }
-      }        
- }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
