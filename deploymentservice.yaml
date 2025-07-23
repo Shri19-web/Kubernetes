@@ -1,4 +1,8 @@
-
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-application-ns
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,17 +22,15 @@ spec:
     spec:
       containers:
       - name: my-application-server
-        image: 131924/kubernetes.com/my-application:latest
+        image: 131924/my-application:latest
         ports:
         - containerPort: 3000
-        
-        
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
   name: my-application-service
+  namespace: my-application-ns
 spec:
   selector:
     app: my-application 
@@ -37,4 +39,4 @@ spec:
   - protocol: TCP
     port: 5000
     targetPort: 3000
-    nodePort: 31110
+
