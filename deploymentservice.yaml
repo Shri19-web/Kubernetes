@@ -30,12 +30,11 @@ metadata:
   name: my-application-service
   namespace: my-application-ns
 spec:
+  type: NodePort
   selector:
     app: my-application
-  type: NodePort
   ports:
     - port: 80
       targetPort: 3000
       nodePort: 31163
       protocol: TCP
-
