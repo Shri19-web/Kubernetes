@@ -19,7 +19,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         script {
-          dockerImage = docker.build("${dockerimagename}:${dockerTag}")
+          dockerImage = docker.build("131924/${my-aaplication}:${latest1}")
         }
       }
     }
