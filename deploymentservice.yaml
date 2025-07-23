@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: my-application-server
-        image: 131924/my-application:latest1
+        image: 131924/my-application:latest
         ports:
         - containerPort: 3000
 ---
