@@ -32,11 +32,8 @@ metadata:
   name: my-application-service
   namespace: my-application-ns
 spec:
-  selector:
-    app: my-application 
-  type: LoadBalancer
+  type: NodePort
   ports:
-  - protocol: TCP
-    port: 5000
-    targetPort: 3000
-
+    - port: 5000
+      targetPort: 3000
+      nodePort: 31500  # Pick a port in range 30000–32767
